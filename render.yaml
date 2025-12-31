@@ -1,0 +1,51 @@
+# Render Blueprint for Weather Prediction System
+# This file allows one-click deployment to Render.com
+
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: weather-db
+    env: docker
+    plan: free
+    databases:
+      - name: weather_db
+        user: weather_user
+
+  # Backend API
+  - type: web
+    name: weather-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: weather-db
+          property: connectionString
+      - key: OPENWEATHER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: USE_MOCK_DB
+        value: false
+      - key: LOG_LEVEL
+        value: INFO
+      - key: CACHE_TTL_MINUTES
+        value: 30
+
+  # Frontend Static Site
+  - type: web
+    name: weather-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://weather-backend.onrender.com
+      - key: REACT_APP_WS_URL
+        value: wss://weather-backend.onrender.com

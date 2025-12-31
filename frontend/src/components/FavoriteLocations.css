@@ -1,0 +1,110 @@
+.favorite-locations {
+  margin-bottom: 32px;
+}
+
+.favorite-locations-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.favorite-locations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.favorite-location-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: var(--white);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.favorite-location-item:hover {
+  border-color: var(--primary-blue);
+  background-color: rgba(0, 102, 204, 0.02);
+}
+
+.favorite-location-item.active {
+  border-color: var(--primary-blue);
+  background-color: rgba(0, 102, 204, 0.08);
+}
+
+.favorite-location-icon {
+  color: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.favorite-location-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.favorite-location-city {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favorite-location-country {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.favorite-location-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.favorite-location-remove:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .favorite-locations {
+    margin-bottom: 24px;
+  }
+
+  .favorite-locations-list {
+    gap: 8px;
+  }
+
+  .favorite-location-item {
+    padding: 8px 12px;
+  }
+
+  .favorite-location-city {
+    font-size: 13px;
+  }
+
+  .favorite-location-country {
+    font-size: 11px;
+  }
+}

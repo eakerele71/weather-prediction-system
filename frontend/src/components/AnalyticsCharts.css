@@ -1,0 +1,106 @@
+.analytics-charts-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.chart-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.chart-tab:hover {
+  background: #f1f5f9;
+  color: #0066CC;
+}
+
+.chart-tab.active {
+  background: #0066CC;
+  color: #ffffff;
+}
+
+.chart-tab-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.chart-tab-label {
+  white-space: nowrap;
+}
+
+.chart-container {
+  position: relative;
+  height: 350px;
+  width: 100%;
+}
+
+.no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chart-tabs {
+    gap: 6px;
+  }
+
+  .chart-tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .chart-tab-icon {
+    font-size: 16px;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-tabs {
+    justify-content: space-between;
+  }
+
+  .chart-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+  }
+
+  .chart-tab-label {
+    display: none;
+  }
+
+  .chart-tab-icon {
+    font-size: 20px;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+}

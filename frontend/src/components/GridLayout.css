@@ -1,0 +1,31 @@
+.grid-layout {
+  display: grid;
+  width: 100%;
+}
+
+.grid-item {
+  min-width: 0; /* Prevent grid blowout */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .grid-layout {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-item[style*="span 3"],
+  .grid-item[style*="span 4"] {
+    grid-column: span 2 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .grid-item {
+    grid-column: span 1 !important;
+  }
+}

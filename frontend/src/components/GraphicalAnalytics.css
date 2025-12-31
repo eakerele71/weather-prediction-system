@@ -1,0 +1,390 @@
+.graphical-analytics-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.analytics-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.analytics-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.analytics-tab:hover {
+  background: #f1f5f9;
+  color: #0066CC;
+}
+
+.analytics-tab.active {
+  background: #0066CC;
+  color: #ffffff;
+}
+
+.analytics-tab-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.analytics-tab-label {
+  white-space: nowrap;
+}
+
+.analytics-view {
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-data {
+  color: #94a3b8;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Wind Compass */
+.wind-compass-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.compass-circle {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 3px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.compass-directions {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.compass-directions span {
+  position: absolute;
+  font-weight: 700;
+  font-size: 18px;
+  color: #1e3a8a;
+}
+
+.compass-n {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.compass-e {
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.compass-s {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.compass-w {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.wind-arrow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 80px solid #0066CC;
+  transform-origin: 50% 100%;
+  margin-left: -15px;
+  margin-top: -80px;
+  transition: transform 0.5s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.compass-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: #1e3a8a;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wind-info {
+  text-align: center;
+}
+
+.wind-speed {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.wind-direction-label {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+}
+
+.wind-category {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* UV Index Gauge */
+.uv-gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.uv-gauge {
+  width: 300px;
+  max-width: 100%;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: auto;
+}
+
+.uv-info {
+  text-align: center;
+}
+
+.uv-value {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.uv-category {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.uv-range {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Comparative Graph */
+.comparative-graph-container {
+  width: 100%;
+  padding: 16px;
+}
+
+.graph-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.temp-bars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 250px;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.temp-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.temp-bar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+}
+
+.temp-bar-container {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 200px;
+  width: 100%;
+}
+
+.temp-bar-high,
+.temp-bar-low {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  transition: all 0.3s ease;
+}
+
+.temp-bar-high {
+  background: linear-gradient(to top, #ef4444, #fca5a5);
+}
+
+.temp-bar-low {
+  background: linear-gradient(to top, #3b82f6, #93c5fd);
+}
+
+.temp-bar-high:hover,
+.temp-bar-low:hover {
+  opacity: 0.8;
+  transform: scaleY(1.05);
+}
+
+.temp-bar-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.graph-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.legend-color {
+  width: 20px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-color.high {
+  background: linear-gradient(to right, #ef4444, #fca5a5);
+}
+
+.legend-color.low {
+  background: linear-gradient(to right, #3b82f6, #93c5fd);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .analytics-tabs {
+    gap: 6px;
+  }
+
+  .analytics-tab {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .compass-circle {
+    width: 200px;
+    height: 200px;
+  }
+
+  .wind-arrow {
+    border-left-width: 12px;
+    border-right-width: 12px;
+    border-bottom-width: 60px;
+    margin-left: -12px;
+    margin-top: -60px;
+  }
+
+  .wind-speed {
+    font-size: 28px;
+  }
+
+  .wind-direction-label {
+    font-size: 20px;
+  }
+
+  .uv-gauge {
+    width: 250px;
+  }
+
+  .uv-value {
+    font-size: 36px;
+  }
+
+  .temp-bars {
+    height: 200px;
+    gap: 8px;
+  }
+
+  .temp-bar-container {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-tab-label {
+    display: none;
+  }
+
+  .analytics-tab-icon {
+    font-size: 20px;
+  }
+
+  .compass-circle {
+    width: 180px;
+    height: 180px;
+  }
+
+  .temp-bars {
+    gap: 4px;
+  }
+
+  .temp-bar-value {
+    font-size: 10px;
+  }
+}

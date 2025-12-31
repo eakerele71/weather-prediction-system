@@ -1,0 +1,54 @@
+.add-to-favorites-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #ffffff;
+  border: 2px solid #0066CC;
+  border-radius: 8px;
+  color: #0066CC;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.add-to-favorites-btn:hover {
+  background-color: #0066CC;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+.add-to-favorites-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.2);
+}
+
+.add-to-favorites-btn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+.add-to-favorites-btn.is-favorite {
+  background-color: #0066CC;
+  color: #ffffff;
+  border-color: #0066CC;
+}
+
+.add-to-favorites-btn.is-favorite:hover {
+  background-color: #004d99;
+  border-color: #004d99;
+}
+
+.add-to-favorites-btn svg {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-to-favorites-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

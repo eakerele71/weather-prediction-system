@@ -1,0 +1,257 @@
+.weather-warnings-container {
+  margin-bottom: 24px;
+}
+
+.warnings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 12px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.warnings-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.warnings-icon {
+  font-size: 24px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.warnings-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.warnings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.warning-card {
+  border: 2px solid;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.warning-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.warning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.warning-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.warning-type-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.warning-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.warning-type {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.warning-severity {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.warning-expand-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.warning-expand-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.warning-description {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+.warning-details {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.warning-time {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.warning-time strong {
+  color: #1f2937;
+}
+
+.safety-recommendations {
+  margin-top: 16px;
+}
+
+.recommendations-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.recommendations-list {
+  margin: 0;
+  padding-left: 24px;
+  list-style: none;
+}
+
+.recommendation-item {
+  position: relative;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  margin-bottom: 8px;
+  padding-left: 8px;
+}
+
+.recommendation-item::before {
+  content: '✓';
+  position: absolute;
+  left: -20px;
+  color: #10b981;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .warnings-header {
+    padding: 12px;
+  }
+
+  .warnings-title {
+    font-size: 18px;
+  }
+
+  .warnings-icon {
+    font-size: 20px;
+  }
+
+  .warning-type-icon {
+    font-size: 28px;
+  }
+
+  .warning-type {
+    font-size: 16px;
+  }
+
+  .warning-severity {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .warnings-header {
+    padding: 12px;
+  }
+
+  .warnings-title {
+    font-size: 16px;
+    gap: 8px;
+  }
+
+  .warning-header-left {
+    gap: 12px;
+  }
+
+  .warning-type-icon {
+    font-size: 24px;
+  }
+
+  .warning-type {
+    font-size: 15px;
+  }
+
+  .warning-severity {
+    font-size: 12px;
+  }
+
+  .recommendation-item {
+    font-size: 13px;
+  }
+}
