@@ -139,7 +139,9 @@ export const WeatherProvider = ({ children }) => {
     setLoading(true);
     setError(null);
 
-    // Reset data when searching for a new location
+    // Reset ALL data when searching for a new location (including currentLocation)
+    // This ensures only successfully validated locations display weather data
+    setCurrentLocation(null);
     setCurrentWeather(null);
     setForecast([]);
     setWarnings([]);
@@ -159,8 +161,7 @@ export const WeatherProvider = ({ children }) => {
       ]);
     } catch (err) {
       console.error('Error fetching location data:', err);
-      // Don't set location if it's invalid
-      setCurrentLocation(null);
+      // Don't set location if it's invalid - it's already null from the reset
       // Error is already set by fetchCurrentWeather
     } finally {
       setLoading(false);
