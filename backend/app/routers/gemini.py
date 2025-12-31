@@ -1,9 +1,15 @@
 """Gemini LLM integration API endpoints"""
 from fastapi import APIRouter, HTTPException, Body
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel
+import httpx
 from app.models import Location, WeatherData, Forecast
 from app.services import GeminiClient, WeatherContext, WeatherPredictor
+from app.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/gemini", tags=["gemini"])
 
@@ -25,6 +31,69 @@ class ChatRequest(BaseModel):
     country: Optional[str] = None
 
 
+async def get_real_weather_data(city: str, country: Optional[str] = None) -> tuple[Optional[Location], Optional[WeatherData]]:
+    """Fetch real weather data for a city
+    
+    Returns:
+        Tuple of (Location, WeatherData) or (None, None) if failed
+    """
+    if not settings.openweather_api_key:
+        return None, None
+    
+    try:
+        # Geocode city
+        query = f"{city},{country}" if country else city
+        geo_url = "http://api.openweathermap.org/geo/1.0/direct"
+        geo_params = {"q": query, "limit": 1, "appid": settings.openweather_api_key}
+        
+        async with httpx.AsyncClient(timeout=10) as client:
+            geo_response = await client.get(geo_url, params=geo_params)
+            geo_data = geo_response.json()
+            
+            if not geo_data:
+                return None, None
+            
+            lat, lon = geo_data[0]["lat"], geo_data[0]["lon"]
+            location = Location(
+                latitude=lat,
+                longitude=lon,
+                city=geo_data[0].get("name", city),
+                country=geo_data[0].get("country", country or "Unknown")
+            )
+            
+            # Fetch weather
+            weather_url = "https://api.openweathermap.org/data/2.5/weather"
+            weather_params = {"lat": lat, "lon": lon, "appid": settings.openweather_api_key, "units": "metric"}
+            
+            weather_response = await client.get(weather_url, params=weather_params)
+            api_data = weather_response.json()
+            
+            main = api_data.get("main", {})
+            wind = api_data.get("wind", {})
+            clouds = api_data.get("clouds", {})
+            weather = api_data.get("weather", [{}])[0]
+            rain = api_data.get("rain", {})
+            
+            weather_data = WeatherData(
+                location=location,
+                timestamp=datetime.now(),
+                temperature=main.get("temp", 0),
+                humidity=main.get("humidity", 0),
+                pressure=main.get("pressure", 1013.25),
+                wind_speed=wind.get("speed", 0),
+                wind_direction=wind.get("deg", 0),
+                precipitation=rain.get("1h", 0),
+                cloud_cover=clouds.get("all", 0),
+                weather_condition=weather.get("main", "Unknown")
+            )
+            
+            return location, weather_data
+            
+    except Exception as e:
+        logger.error(f"Error fetching real weather data: {e}")
+        return None, None
+
+
 @router.post("/explain")
 async def explain_weather(request: ExplainRequest):
     """
@@ -37,27 +106,29 @@ async def explain_weather(request: ExplainRequest):
         Natural language weather explanation
     """
     try:
-        # Create location
-        location = Location(
-            latitude=0.0,
-            longitude=0.0,
-            city=request.city,
-            country=request.country or "Unknown"
-        )
+        # Try to get real weather data
+        location, current_weather = await get_real_weather_data(request.city, request.country)
         
-        # Get current weather (simulated)
-        current_weather = WeatherData(
-            location=location,
-            timestamp=__import__('datetime').datetime.now(),
-            temperature=15.0,
-            humidity=65.0,
-            pressure=1013.25,
-            wind_speed=5.0,
-            wind_direction=180.0,
-            precipitation=0.0,
-            cloud_cover=40.0,
-            weather_condition="Partly Cloudy"
-        )
+        if not location or not current_weather:
+            # Fallback to simulated data
+            location = Location(
+                latitude=0.0,
+                longitude=0.0,
+                city=request.city,
+                country=request.country or "Unknown"
+            )
+            current_weather = WeatherData(
+                location=location,
+                timestamp=datetime.now(),
+                temperature=15.0,
+                humidity=65.0,
+                pressure=1013.25,
+                wind_speed=5.0,
+                wind_direction=180.0,
+                precipitation=0.0,
+                cloud_cover=40.0,
+                weather_condition="Partly Cloudy"
+            )
         
         # Get forecast
         forecasts = predictor.predict(location, days=7)
@@ -74,7 +145,7 @@ async def explain_weather(request: ExplainRequest):
         return {
             "location": location,
             "explanation": explanation,
-            "generated_at": __import__('datetime').datetime.now()
+            "generated_at": datetime.now()
         }
         
     except Exception as e:
@@ -97,31 +168,36 @@ async def chat_with_gemini(request: ChatRequest):
         context = WeatherContext()
         
         if request.city:
-            location = Location(
-                latitude=0.0,
-                longitude=0.0,
-                city=request.city,
-                country=request.country or "Unknown"
-            )
-            context.location = location
+            # Try to get real weather data
+            location, current_weather = await get_real_weather_data(request.city, request.country)
             
-            # Get current weather
-            current_weather = WeatherData(
-                location=location,
-                timestamp=__import__('datetime').datetime.now(),
-                temperature=15.0,
-                humidity=65.0,
-                pressure=1013.25,
-                wind_speed=5.0,
-                wind_direction=180.0,
-                precipitation=0.0,
-                cloud_cover=40.0,
-                weather_condition="Partly Cloudy"
-            )
-            context.current_weather = current_weather
+            if location and current_weather:
+                context.location = location
+                context.current_weather = current_weather
+            else:
+                # Fallback
+                location = Location(
+                    latitude=0.0,
+                    longitude=0.0,
+                    city=request.city,
+                    country=request.country or "Unknown"
+                )
+                context.location = location
+                context.current_weather = WeatherData(
+                    location=location,
+                    timestamp=datetime.now(),
+                    temperature=15.0,
+                    humidity=65.0,
+                    pressure=1013.25,
+                    wind_speed=5.0,
+                    wind_direction=180.0,
+                    precipitation=0.0,
+                    cloud_cover=40.0,
+                    weather_condition="Partly Cloudy"
+                )
             
             # Get forecasts
-            forecasts = predictor.predict(location, days=7)
+            forecasts = predictor.predict(context.location, days=7)
             context.forecasts = forecasts
         
         # Get answer
@@ -131,7 +207,7 @@ async def chat_with_gemini(request: ChatRequest):
             "question": request.question,
             "answer": answer,
             "context_provided": bool(request.city),
-            "generated_at": __import__('datetime').datetime.now()
+            "generated_at": datetime.now()
         }
         
     except Exception as e:
@@ -154,13 +230,16 @@ async def get_forecast_summary(
         Natural language forecast summary
     """
     try:
-        # Create location
-        location = Location(
-            latitude=0.0,
-            longitude=0.0,
-            city=city,
-            country=country or "Unknown"
-        )
+        # Try to get real location
+        location, _ = await get_real_weather_data(city, country)
+        
+        if not location:
+            location = Location(
+                latitude=0.0,
+                longitude=0.0,
+                city=city,
+                country=country or "Unknown"
+            )
         
         # Get forecasts
         forecasts = predictor.predict(location, days=7)
@@ -175,7 +254,7 @@ async def get_forecast_summary(
             "location": location,
             "summary": summary,
             "forecast_days": len(forecasts),
-            "generated_at": __import__('datetime').datetime.now()
+            "generated_at": datetime.now()
         }
         
     except Exception as e:
