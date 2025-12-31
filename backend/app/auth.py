@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
-import bcrypt
+import hashlib
 from pydantic import BaseModel
 
 # Configuration
@@ -39,27 +39,31 @@ class UserInDB(User):
     hashed_password: str
 
 
+def simple_hash(password: str) -> str:
+    """Simple SHA256 hash for passwords - works without Rust compilation"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
 # Mock user database (replace with real database in production)
+# Using SHA256 hash which doesn't require Rust compilation
 fake_users_db = {
     "testuser": {
         "username": "testuser",
         "email": "test@example.com",
-        "hashed_password": "$2b$12$2qB96f1fGtfWcwwfR3.C..KlwavFXyQddKmMhvf4wmagFawPfhEvW",  # "secret"
+        "hashed_password": simple_hash("secret"),  # SHA256 hash of "secret"
         "disabled": False,
     }
 }
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash"""
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    """Verify a password against its hash using SHA256"""
+    return simple_hash(plain_password) == hashed_password
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password"""
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed.decode('utf-8')
+    """Hash a password using SHA256"""
+    return simple_hash(password)
 
 
 def get_user(username: str) -> Optional[UserInDB]:
