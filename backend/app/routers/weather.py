@@ -47,19 +47,50 @@ async def geocode_city(city: str, country: Optional[str] = None) -> Optional[dic
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url, params=params)
+            
+            # Handle 404 specifically
+            if response.status_code == 404:
+                logger.info(f"Location not found: {city}")
+                return None
+            
             response.raise_for_status()
             data = response.json()
             
             if data and len(data) > 0:
+                location_data = data[0]
+                
+                # Validate that we have valid coordinates (real geographic location)
+                lat = location_data.get("lat")
+                lon = location_data.get("lon")
+                
+                if lat is None or lon is None:
+                    logger.warning(f"Location '{city}' has no coordinates")
+                    return None
+                
+                # Ensure coordinates are valid ranges
+                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                    logger.warning(f"Invalid coordinates for '{city}': lat={lat}, lon={lon}")
+                    return None
+                
                 return {
-                    "lat": data[0]["lat"],
-                    "lon": data[0]["lon"],
-                    "city": data[0].get("name", city),
-                    "country": data[0].get("country", country or "Unknown")
+                    "lat": lat,
+                    "lon": lon,
+                    "city": location_data.get("name", city),
+                    "country": location_data.get("country", country or "Unknown")
                 }
+            
+            # Empty result array means location not found
+            logger.info(f"No results found for location: {city}")
             return None
+            
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error during geocoding: {e.response.status_code} - {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.error(f"Timeout while geocoding: {city}")
+        return None
     except Exception as e:
-        logger.error(f"Geocoding error: {e}")
+        logger.error(f"Geocoding error for '{city}': {e}")
         return None
 
 
@@ -87,8 +118,28 @@ async def fetch_current_weather_from_api(lat: float, lon: float) -> Optional[dic
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url, params=params)
+            
+            # Handle 404 specifically
+            if response.status_code == 404:
+                logger.warning(f"Weather not found for coordinates: {lat}, {lon}")
+                return None
+            
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            
+            # Validate response has coordinates (ensures it's real geographic data)
+            if "coord" in data and "lat" in data["coord"] and "lon" in data["coord"]:
+                return data
+            else:
+                logger.warning(f"Weather data missing coordinates for {lat}, {lon}")
+                return None
+                
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error fetching weather: {e.response.status_code} - {e}")
+        return None
+    except httpx.TimeoutException:
+        logger.error(f"Timeout fetching weather for {lat}, {lon}")
+        return None
     except Exception as e:
         logger.error(f"Weather API error: {e}")
         return None
