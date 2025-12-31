@@ -195,29 +195,28 @@ async def get_forecast(
         # Geocode the city
         geo_data = await geocode_city(city, country)
         
-        if geo_data:
-            location = Location(
-                latitude=geo_data["lat"],
-                longitude=geo_data["lon"],
-                city=geo_data["city"],
-                country=geo_data["country"]
+        if not geo_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
             )
-            
-            # Fetch real forecast from API
-            api_data = await fetch_forecast_from_api(geo_data["lat"], geo_data["lon"])
-            
-            if api_data:
-                forecasts = parse_forecast_data(api_data, location, days)
-                if forecasts:
-                    return forecasts
         
-        # Fallback to predictor if API fails
         location = Location(
-            latitude=0.0,
-            longitude=0.0,
-            city=city,
-            country=country or "Unknown"
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
+            city=geo_data["city"],
+            country=geo_data["country"]
         )
+        
+        # Fetch real forecast from API
+        api_data = await fetch_forecast_from_api(geo_data["lat"], geo_data["lon"])
+        
+        if api_data:
+            forecasts = parse_forecast_data(api_data, location, days)
+            if forecasts:
+                return forecasts
+        
+        # Fallback to predictor if API fails (but location was valid)
         forecasts = predictor.predict(location, days=days)
         
         if not forecasts:
@@ -244,58 +243,50 @@ async def get_current_weather(
         # Geocode the city
         geo_data = await geocode_city(city, country)
         
-        if geo_data:
-            location = Location(
-                latitude=geo_data["lat"],
-                longitude=geo_data["lon"],
-                city=geo_data["city"],
-                country=geo_data["country"]
+        if not geo_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
             )
-            
-            # Fetch real weather from API
-            api_data = await fetch_current_weather_from_api(geo_data["lat"], geo_data["lon"])
-            
-            if api_data:
-                main = api_data.get("main", {})
-                wind = api_data.get("wind", {})
-                clouds = api_data.get("clouds", {})
-                weather = api_data.get("weather", [{}])[0]
-                rain = api_data.get("rain", {})
-                
-                return WeatherData(
-                    location=location,
-                    timestamp=datetime.now(),
-                    temperature=main.get("temp", 0),
-                    humidity=main.get("humidity", 0),
-                    pressure=main.get("pressure", 1013.25),
-                    wind_speed=wind.get("speed", 0),
-                    wind_direction=wind.get("deg", 0),
-                    precipitation=rain.get("1h", 0),
-                    cloud_cover=clouds.get("all", 0),
-                    weather_condition=weather.get("main", "Unknown")
-                )
         
-        # Fallback to simulated data if API fails
         location = Location(
-            latitude=0.0,
-            longitude=0.0,
-            city=city,
-            country=country or "Unknown"
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
+            city=geo_data["city"],
+            country=geo_data["country"]
         )
         
-        return WeatherData(
-            location=location,
-            timestamp=datetime.now(),
-            temperature=15.0,
-            humidity=65.0,
-            pressure=1013.25,
-            wind_speed=5.0,
-            wind_direction=180.0,
-            precipitation=0.0,
-            cloud_cover=40.0,
-            weather_condition="Partly Cloudy"
+        # Fetch real weather from API
+        api_data = await fetch_current_weather_from_api(geo_data["lat"], geo_data["lon"])
+        
+        if api_data:
+            main = api_data.get("main", {})
+            wind = api_data.get("wind", {})
+            clouds = api_data.get("clouds", {})
+            weather = api_data.get("weather", [{}])[0]
+            rain = api_data.get("rain", {})
+            
+            return WeatherData(
+                location=location,
+                timestamp=datetime.now(),
+                temperature=main.get("temp", 0),
+                humidity=main.get("humidity", 0),
+                pressure=main.get("pressure", 1013.25),
+                wind_speed=wind.get("speed", 0),
+                wind_direction=wind.get("deg", 0),
+                precipitation=rain.get("1h", 0),
+                cloud_cover=clouds.get("all", 0),
+                weather_condition=weather.get("main", "Unknown")
+            )
+        
+        # API call failed but location was valid - return error
+        raise HTTPException(
+            status_code=503, 
+            detail=f"Weather service temporarily unavailable for {city}. Please try again."
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching current weather: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching current weather: {str(e)}")
@@ -313,20 +304,18 @@ async def get_weather_warnings(
         # Geocode the city
         geo_data = await geocode_city(city, country)
         
-        if geo_data:
-            location = Location(
-                latitude=geo_data["lat"],
-                longitude=geo_data["lon"],
-                city=geo_data["city"],
-                country=geo_data["country"]
+        if not geo_data:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
             )
-        else:
-            location = Location(
-                latitude=0.0,
-                longitude=0.0,
-                city=city,
-                country=country or "Unknown"
-            )
+        
+        location = Location(
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
+            city=geo_data["city"],
+            country=geo_data["country"]
+        )
         
         # Get forecasts to analyze for warnings
         forecasts = predictor.predict(location, days=7)
@@ -339,6 +328,8 @@ async def get_weather_warnings(
         
         return warnings
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error fetching warnings: {e}")
         raise HTTPException(status_code=500, detail=f"Error fetching warnings: {str(e)}")
@@ -406,7 +397,10 @@ async def get_hourly_forecast(
         geo_data = await geocode_city(city, country)
         
         if not geo_data:
-            raise HTTPException(status_code=404, detail=f"City not found: {city}")
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
+            )
         
         location = Location(
             latitude=geo_data["lat"],

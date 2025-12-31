@@ -16,11 +16,11 @@ import GeminiChatPanel from '../components/GeminiChatPanel';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { currentLocation, loading, error } = useWeather();
+  const { currentLocation, loading, error, clearError } = useWeather();
 
   return (
     <div className="dashboard">
-      <Header 
+      <Header
         title="Weather Prediction System"
         subtitle="ML-powered weather forecasting with real-time analytics"
       />
@@ -31,8 +31,12 @@ const Dashboard = () => {
           <FavoriteLocations />
 
           {error && (
-            <div className="error-message">
-              {error}
+            <div className="error-message" role="alert">
+              <span className="error-icon">⚠️</span>
+              <p>{error}</p>
+              <button className="error-close-btn" onClick={clearError} aria-label="Close error message">
+                ×
+              </button>
             </div>
           )}
 

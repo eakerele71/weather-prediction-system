@@ -51,7 +51,14 @@ export const WeatherProvider = ({ children }) => {
       setCurrentWeather(response.data);
       return response.data;
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Failed to fetch current weather';
+      let errorMsg = 'Failed to fetch current weather';
+      if (err.response?.data?.detail) {
+        errorMsg = Array.isArray(err.response.data.detail)
+          ? err.response.data.detail.map(e => e.msg).join(', ')
+          : err.response.data.detail;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
       setError(errorMsg);
       throw err;
     } finally {
@@ -72,7 +79,14 @@ export const WeatherProvider = ({ children }) => {
       setForecast(forecastData);
       return response.data;
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Failed to fetch forecast';
+      let errorMsg = 'Failed to fetch forecast';
+      if (err.response?.data?.detail) {
+        errorMsg = Array.isArray(err.response.data.detail)
+          ? err.response.data.detail.map(e => e.msg).join(', ')
+          : err.response.data.detail;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
       setError(errorMsg);
       throw err;
     } finally {
@@ -122,19 +136,32 @@ export const WeatherProvider = ({ children }) => {
 
   // Fetch all data for a location
   const fetchLocationData = useCallback(async (city) => {
-    setCurrentLocation(city);
     setLoading(true);
     setError(null);
 
+    // Reset data when searching for a new location
+    setCurrentWeather(null);
+    setForecast([]);
+    setWarnings([]);
+    setAnalytics(null);
+
     try {
+      // First try to fetch current weather - this validates the location
+      await fetchCurrentWeather(city);
+
+      // If current weather succeeded, location is valid - set it and fetch rest
+      setCurrentLocation(city);
+
       await Promise.all([
-        fetchCurrentWeather(city),
         fetchForecast(city),
         fetchWarnings(city),
         fetchAnalytics(city),
       ]);
     } catch (err) {
       console.error('Error fetching location data:', err);
+      // Don't set location if it's invalid
+      setCurrentLocation(null);
+      // Error is already set by fetchCurrentWeather
     } finally {
       setLoading(false);
     }
