@@ -3,6 +3,14 @@
   border: 1px solid #e5e7eb;
 }
 
+.forecast-hint {
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
 .forecast-timeline {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -19,12 +27,26 @@
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .forecast-day:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 102, 204, 0.15);
   border-color: #0066CC;
+}
+
+.forecast-day:hover .click-hint {
+  opacity: 1;
+}
+
+.click-hint {
+  position: absolute;
+  bottom: 8px;
+  font-size: 11px;
+  color: #0066CC;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .forecast-date {
@@ -96,6 +118,7 @@
 .forecast-confidence {
   width: 100%;
   margin-top: 8px;
+  margin-bottom: 16px;
 }
 
 .confidence-bar {
@@ -111,6 +134,209 @@
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Modal Styles */
+.forecast-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.forecast-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.modal-close:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, #0066CC 0%, #1e40af 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.modal-title h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-location {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.modal-weather-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 20px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.summary-value.temp-high {
+  color: #ef4444;
+}
+
+.summary-value.temp-low {
+  color: #3b82f6;
+}
+
+.modal-explanation {
+  padding: 24px;
+}
+
+.modal-explanation h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.explanation-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  color: #64748b;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0066CC;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.explanation-content {
+  line-height: 1.7;
+  color: #374151;
+}
+
+.explanation-content p {
+  margin: 0 0 12px 0;
+}
+
+.explanation-content p:last-child {
+  margin-bottom: 0;
+}
+
+.explanation-content p:empty {
+  display: none;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 16px 16px;
+}
+
+.confidence-note {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+}
+
+.confidence-note span {
+  font-weight: 600;
 }
 
 /* Responsive */
@@ -141,6 +367,14 @@
 
   .forecast-day {
     padding: 16px;
+  }
+
+  .modal-weather-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .forecast-modal {
+    max-height: 90vh;
   }
 }
 
@@ -181,5 +415,25 @@
 
   .forecast-confidence {
     display: none;
+  }
+
+  .click-hint {
+    display: none;
+  }
+
+  .forecast-hint {
+    display: none;
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+
+  .modal-icon {
+    font-size: 48px;
+  }
+
+  .modal-explanation {
+    padding: 20px;
   }
 }
