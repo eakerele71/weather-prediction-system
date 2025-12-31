@@ -382,3 +382,93 @@ async def get_forecast_by_coordinates(
     except Exception as e:
         logger.error(f"Error generating forecast: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating forecast: {str(e)}")
+
+
+@router.get("/hourly/{city}")
+async def get_hourly_forecast(
+    city: str,
+    country: Optional[str] = Query(None, description="Country name"),
+    hours: int = Query(24, ge=1, le=48, description="Number of hours to forecast")
+):
+    """
+    Get hourly weather forecast for a location (up to 48 hours)
+    
+    Args:
+        city: City name
+        country: Optional country name
+        hours: Number of hours to return (1-48)
+        
+    Returns:
+        List of hourly forecast data
+    """
+    try:
+        # Geocode the city
+        geo_data = await geocode_city(city, country)
+        
+        if not geo_data:
+            raise HTTPException(status_code=404, detail=f"City not found: {city}")
+        
+        location = Location(
+            latitude=geo_data["lat"],
+            longitude=geo_data["lon"],
+            city=geo_data["city"],
+            country=geo_data["country"]
+        )
+        
+        # Fetch forecast data (contains 3-hour intervals for 5 days)
+        api_data = await fetch_forecast_from_api(geo_data["lat"], geo_data["lon"])
+        
+        if not api_data or "list" not in api_data:
+            raise HTTPException(status_code=500, detail="Failed to fetch hourly forecast")
+        
+        hourly_data = []
+        now = datetime.now()
+        
+        for item in api_data.get("list", [])[:hours // 3 + 1]:  # API returns 3-hour intervals
+            dt = datetime.fromtimestamp(item["dt"])
+            
+            # Skip past hours
+            if dt < now:
+                continue
+            
+            main = item.get("main", {})
+            wind = item.get("wind", {})
+            clouds = item.get("clouds", {})
+            weather = item.get("weather", [{}])[0]
+            rain = item.get("rain", {})
+            
+            hourly_item = {
+                "datetime": dt.isoformat(),
+                "timestamp": item["dt"],
+                "temperature": main.get("temp", 0),
+                "feels_like": main.get("feels_like", 0),
+                "humidity": main.get("humidity", 0),
+                "pressure": main.get("pressure", 1013),
+                "wind_speed": wind.get("speed", 0),
+                "wind_direction": wind.get("deg", 0),
+                "wind_gust": wind.get("gust", 0),
+                "clouds": clouds.get("all", 0),
+                "precipitation_probability": item.get("pop", 0),
+                "rain_volume": rain.get("3h", 0),
+                "weather_condition": weather.get("main", "Unknown"),
+                "weather_description": weather.get("description", ""),
+                "weather_icon": weather.get("icon", "01d"),
+                "visibility": item.get("visibility", 10000)
+            }
+            hourly_data.append(hourly_item)
+            
+            if len(hourly_data) >= hours // 3:
+                break
+        
+        return {
+            "location": location,
+            "hourly": hourly_data,
+            "timezone": api_data.get("city", {}).get("timezone", 0),
+            "generated_at": datetime.now().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching hourly forecast: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching hourly forecast: {str(e)}")

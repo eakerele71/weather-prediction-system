@@ -7,6 +7,7 @@ import WeatherCard from '../components/WeatherCard';
 import LocationInput from '../components/LocationInput';
 import FavoriteLocations from '../components/FavoriteLocations';
 import CurrentWeatherCard from '../components/CurrentWeatherCard';
+import HourlyForecast from '../components/HourlyForecast';
 import ForecastTimeline from '../components/ForecastTimeline';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import GraphicalAnalytics from '../components/GraphicalAnalytics';
@@ -58,6 +59,9 @@ const Dashboard = () => {
               </div>
               <div className="grid-col-12">
                 <CurrentWeatherCard />
+              </div>
+              <div className="grid-col-12">
+                <HourlyForecast />
               </div>
               <div className="grid-col-12">
                 <ForecastTimeline />
