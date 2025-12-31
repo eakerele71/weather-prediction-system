@@ -21,11 +21,64 @@ const POPULAR_CITIES = [
   { city: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198 },
 ];
 
+/**
+ * Smart pre-validation to catch obviously invalid inputs
+ * before calling the API. This provides instant UX feedback
+ * while keeping the comprehensive API validation as source of truth.
+ */
+function validateLocationInput(input) {
+  const trimmed = input.trim();
+
+  // Too short
+  if (trimmed.length < 2) {
+    return {
+      valid: false,
+      error: 'Location name is too short. Please enter at least 2 characters.'
+    };
+  }
+
+  // Only numbers (e.g., "12345")
+  if (/^\d+$/.test(trimmed)) {
+    return {
+      valid: false,
+      error: 'Please enter a location name, not a number.'
+    };
+  }
+
+  // Excessive special characters (more than 20% of string)
+  const specialChars = (trimmed.match(/[^a-zA-Z0-9\s\-,.']/g) || []).length;
+  if (specialChars / trimmed.length > 0.2) {
+    return {
+      valid: false,
+      error: 'Please enter a valid city, state, or country name.'
+    };
+  }
+
+  // Common keyboard mashing patterns that are clearly not locations
+  const invalidPatterns = [
+    { pattern: /^[!@#$%^&*()_+={}[\]:;<>,.?~\\|/-]+$/, error: 'Please enter letters, not symbols.' },
+    { pattern: /^(test|testing)$/i, error: 'Please enter a real location name.' },
+    { pattern: /^(asdf|qwer|zxcv|hjkl)+/i, error: 'Please enter a real location name.' },
+    { pattern: /^(zzz|xxx|aaa|bbb)+$/i, error: 'Please enter a real location name.' },
+    { pattern: /^(.)\1{4,}/, error: 'Please enter a real location name.' }, // Repeated chars like "aaaaa"
+  ];
+
+  for (const { pattern, error } of invalidPatterns) {
+    if (pattern.test(trimmed)) {
+      return { valid: false, error };
+    }
+  }
+
+  // Looks reasonable - let API validate
+  return { valid: true };
+}
+
 const LocationInput = ({ onLocationSelect }) => {
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [validationError, setValidationError] = useState(null);
   const inputRef = useRef(null);
   const suggestionsRef = useRef(null);
 
@@ -39,7 +92,7 @@ const LocationInput = ({ onLocationSelect }) => {
           location.city.toLowerCase().includes(input.toLowerCase()) ||
           location.country.toLowerCase().includes(input.toLowerCase())
       );
-      
+
       // Add favorite locations to suggestions
       const favoriteSuggestions = favoriteLocations.filter(
         (location) =>
@@ -74,12 +127,13 @@ const LocationInput = ({ onLocationSelect }) => {
   const handleInputChange = (e) => {
     setInput(e.target.value);
     setSelectedIndex(-1);
+    setValidationError(null); // Clear validation error when user types
   };
 
   const handleLocationSelect = async (location) => {
     setInput(location.city);
     setShowSuggestions(false);
-    
+
     try {
       await fetchLocationData(location.city);
       if (onLocationSelect) {
@@ -92,12 +146,24 @@ const LocationInput = ({ onLocationSelect }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (input.trim()) {
-      // If a suggestion is selected, use it
+      // If a suggestion is selected, use it (skip validation - suggestions are pre-validated)
       if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+        setValidationError(null);
         await handleLocationSelect(suggestions[selectedIndex]);
       } else {
+        // Validate input before making API call
+        const validation = validateLocationInput(input);
+
+        if (!validation.valid) {
+          setValidationError(validation.error);
+          return;
+        }
+
+        // Clear validation error and proceed
+        setValidationError(null);
+
         // Otherwise, try to fetch data for the entered city name
         try {
           await fetchLocationData(input.trim());
@@ -177,14 +243,19 @@ const LocationInput = ({ onLocationSelect }) => {
           </button>
         </div>
 
+        {validationError && (
+          <div className="validation-error" role="alert">
+            {validationError}
+          </div>
+        )}
+
         {showSuggestions && suggestions.length > 0 && (
           <div ref={suggestionsRef} className="location-suggestions">
             {suggestions.map((location, index) => (
               <div
                 key={`${location.city}-${location.country}-${index}`}
-                className={`location-suggestion-item ${
-                  index === selectedIndex ? 'selected' : ''
-                }`}
+                className={`location-suggestion-item ${index === selectedIndex ? 'selected' : ''
+                  }`}
                 onClick={() => handleLocationSelect(location)}
                 onMouseEnter={() => setSelectedIndex(index)}
               >
