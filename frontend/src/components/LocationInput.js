@@ -28,6 +28,7 @@ const POPULAR_CITIES = [
  */
 function validateLocationInput(input) {
   const trimmed = input.trim();
+  const lowerCased = trimmed.toLowerCase();
 
   // Too short
   if (trimmed.length < 2) {
@@ -48,6 +49,35 @@ function validateLocationInput(input) {
   // Excessive special characters (more than 20% of string)
   const specialChars = (trimmed.match(/[^a-zA-Z0-9\s\-,.']/g) || []).length;
   if (specialChars / trimmed.length > 0.2) {
+    return {
+      valid: false,
+      error: 'Please enter a valid city, state, or country name.'
+    };
+  }
+
+  // Common non-location words (food, objects, people, etc.)
+  const nonLocationWords = [
+    'rice', 'beans', 'food', 'pizza', 'burger', 'bread', 'meat', 'fish',
+    'car', 'bike', 'phone', 'computer', 'table', 'chair', 'book', 'pen',
+    'dog', 'cat', 'bird', 'animal', 'apple', 'orange', 'banana', 'fruit',
+    'water', 'juice', 'coffee', 'tea', 'drink', 'shirt', 'pants', 'shoe',
+    'person', 'people', 'man', 'woman', 'boy', 'girl', 'baby', 'name',
+    'house', 'room', 'door', 'window', 'tree', 'flower', 'grass', 'plant'
+  ];
+
+  // Check if input contains multiple non-location words
+  const words = lowerCased.split(/\s+/);
+  const nonLocationCount = words.filter(word => nonLocationWords.includes(word)).length;
+
+  if (nonLocationCount >= 2) {
+    return {
+      valid: false,
+      error: 'Please enter a valid location name, not common objects or phrases.'
+    };
+  }
+
+  if (nonLocationCount === 1 && words.length <= 2) {
+    // Single non-location word like "rice" or "rice city" (unlikely to be valid)
     return {
       valid: false,
       error: 'Please enter a valid city, state, or country name.'
