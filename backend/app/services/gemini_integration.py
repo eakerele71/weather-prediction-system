@@ -322,17 +322,32 @@ class GeminiClient:
             logger.warning("No Gemini API key configured, using fallback")
             raise Exception("No API key configured")
         
-        # In production, this would make actual API call to Gemini
-        # For now, return a simulated response
-        logger.info("Simulating Gemini API call (no actual API key configured)")
-        
-        # Simulate API response based on prompt content
-        if "forecast summary" in prompt.lower():
-            return self._generate_simulated_summary(prompt)
-        elif "explain" in prompt.lower():
-            return self._generate_simulated_explanation(prompt)
-        else:
-            return self._generate_simulated_answer(prompt)
+        try:
+            # Import and configure Gemini
+            import google.generativeai as genai
+            genai.configure(api_key=self.api_key)
+            
+            # Create model and generate response
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(prompt)
+            
+            self.last_request_time = datetime.now()
+            
+            if response.text:
+                return response.text
+            else:
+                logger.warning("Empty response from Gemini API")
+                raise Exception("Empty response from API")
+                
+        except Exception as e:
+            logger.error(f"Gemini API call failed: {e}")
+            # Return simulated response as fallback
+            if "forecast summary" in prompt.lower():
+                return self._generate_simulated_summary(prompt)
+            elif "explain" in prompt.lower():
+                return self._generate_simulated_explanation(prompt)
+            else:
+                return self._generate_simulated_answer(prompt)
 
     def _is_rate_limited(self) -> bool:
         """Check if rate limit has been reached

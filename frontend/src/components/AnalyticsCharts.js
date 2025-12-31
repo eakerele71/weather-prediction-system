@@ -42,7 +42,8 @@ const AnalyticsCharts = () => {
     if (!forecast || forecast.length === 0) return null;
 
     const labels = forecast.map(day => {
-      const date = new Date(day.date);
+      const dateStr = day.forecast_date || day.date;
+      const date = new Date(dateStr);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
@@ -51,7 +52,7 @@ const AnalyticsCharts = () => {
       datasets: [
         {
           label: 'High Temperature',
-          data: forecast.map(day => day.temperature_high),
+          data: forecast.map(day => day.predicted_temperature_high || day.temperature_high || 0),
           borderColor: '#ef4444',
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
           fill: true,
@@ -59,7 +60,7 @@ const AnalyticsCharts = () => {
         },
         {
           label: 'Low Temperature',
-          data: forecast.map(day => day.temperature_low),
+          data: forecast.map(day => day.predicted_temperature_low || day.temperature_low || 0),
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           fill: true,
@@ -74,7 +75,8 @@ const AnalyticsCharts = () => {
     if (!forecast || forecast.length === 0) return null;
 
     const labels = forecast.map(day => {
-      const date = new Date(day.date);
+      const dateStr = day.forecast_date || day.date;
+      const date = new Date(dateStr);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
@@ -97,7 +99,8 @@ const AnalyticsCharts = () => {
     if (!forecast || forecast.length === 0) return null;
 
     const labels = forecast.map(day => {
-      const date = new Date(day.date);
+      const dateStr = day.forecast_date || day.date;
+      const date = new Date(dateStr);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
@@ -121,7 +124,8 @@ const AnalyticsCharts = () => {
     if (!forecast || forecast.length === 0) return null;
 
     const labels = forecast.map(day => {
-      const date = new Date(day.date);
+      const dateStr = day.forecast_date || day.date;
+      const date = new Date(dateStr);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 

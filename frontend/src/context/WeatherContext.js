@@ -67,7 +67,9 @@ export const WeatherProvider = ({ children }) => {
       const response = await apiClient.get(`/api/v1/forecast/${city}`, {
         params: { days },
       });
-      setForecast(response.data.forecasts || []);
+      // Backend returns array directly, not wrapped in { forecasts: [...] }
+      const forecastData = Array.isArray(response.data) ? response.data : (response.data.forecasts || []);
+      setForecast(forecastData);
       return response.data;
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to fetch forecast';
@@ -82,7 +84,9 @@ export const WeatherProvider = ({ children }) => {
   const fetchWarnings = useCallback(async (city) => {
     try {
       const response = await apiClient.get(`/api/v1/warnings/${city}`);
-      setWarnings(response.data.warnings || []);
+      // Backend returns array directly, not wrapped in { warnings: [...] }
+      const warningsData = Array.isArray(response.data) ? response.data : (response.data.warnings || []);
+      setWarnings(warningsData);
       return response.data;
     } catch (err) {
       console.error('Failed to fetch warnings:', err);
@@ -179,20 +183,20 @@ export const WeatherProvider = ({ children }) => {
     try {
       const response = await apiClient.post('/api/v1/gemini/chat', {
         question,
-        context,
+        city: context.location || currentLocation || null,
       });
       return response.data;
     } catch (err) {
       console.error('Failed to get Gemini response:', err);
       throw err;
     }
-  }, []);
+  }, [currentLocation]);
 
   // Gemini explain - get weather explanation
   const explainWeather = useCallback(async (city) => {
     try {
       const response = await apiClient.post('/api/v1/gemini/explain', {
-        location: city,
+        city: city,
       });
       return response.data;
     } catch (err) {

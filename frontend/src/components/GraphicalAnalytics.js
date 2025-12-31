@@ -160,18 +160,22 @@ const GraphicalAnalytics = () => {
       return <div className="no-data">No forecast data available</div>;
     }
 
-    const maxTemp = Math.max(...forecast.map(d => d.temperature_high));
-    const minTemp = Math.min(...forecast.map(d => d.temperature_low));
-    const range = maxTemp - minTemp;
+    // Use correct field names from backend: predicted_temperature_high/low and forecast_date
+    const maxTemp = Math.max(...forecast.map(d => d.predicted_temperature_high || d.temperature_high || 0));
+    const minTemp = Math.min(...forecast.map(d => d.predicted_temperature_low || d.temperature_low || 0));
+    const range = maxTemp - minTemp || 1; // Avoid division by zero
 
     return (
       <div className="comparative-graph-container">
         <h4 className="graph-title">Temperature Comparison (7 Days)</h4>
         <div className="temp-bars">
           {forecast.map((day, index) => {
-            const date = new Date(day.date);
-            const highPercent = ((day.temperature_high - minTemp) / range) * 100;
-            const lowPercent = ((day.temperature_low - minTemp) / range) * 100;
+            const dateStr = day.forecast_date || day.date;
+            const date = new Date(dateStr);
+            const highTemp = day.predicted_temperature_high || day.temperature_high || 0;
+            const lowTemp = day.predicted_temperature_low || day.temperature_low || 0;
+            const highPercent = ((highTemp - minTemp) / range) * 100;
+            const lowPercent = ((lowTemp - minTemp) / range) * 100;
 
             return (
               <div key={index} className="temp-bar-item">
@@ -183,13 +187,13 @@ const GraphicalAnalytics = () => {
                     className="temp-bar-high"
                     style={{ height: `${highPercent}%` }}
                   >
-                    <span className="temp-bar-value">{Math.round(day.temperature_high)}°</span>
+                    <span className="temp-bar-value">{Math.round(highTemp)}°</span>
                   </div>
                   <div 
                     className="temp-bar-low"
                     style={{ height: `${lowPercent}%` }}
                   >
-                    <span className="temp-bar-value">{Math.round(day.temperature_low)}°</span>
+                    <span className="temp-bar-value">{Math.round(lowTemp)}°</span>
                   </div>
                 </div>
               </div>

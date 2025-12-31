@@ -63,45 +63,54 @@ const ForecastTimeline = () => {
   return (
     <WeatherCard title="7-Day Forecast" className="forecast-timeline-card">
       <div className="forecast-timeline">
-        {forecast.map((day, index) => (
-          <div key={index} className="forecast-day">
-            <div className="forecast-date">{formatDate(day.date)}</div>
-            
-            <div className="forecast-icon">
-              {getWeatherIcon(day.condition)}
-            </div>
-
-            <div className="forecast-condition">{day.condition}</div>
-
-            <div className="forecast-temps">
-              <span className="temp-high">{Math.round(day.temperature_high)}°</span>
-              <span className="temp-separator">/</span>
-              <span className="temp-low">{Math.round(day.temperature_low)}°</span>
-            </div>
-
-            {day.precipitation_probability !== null && day.precipitation_probability !== undefined && (
-              <div className="forecast-precipitation">
-                <span className="precip-icon">💧</span>
-                <span className="precip-value">{Math.round(day.precipitation_probability * 100)}%</span>
+        {forecast.map((day, index) => {
+          // Support both backend field names (predicted_temperature_high/low, forecast_date, weather_condition)
+          // and legacy field names (temperature_high/low, date, condition)
+          const dateStr = day.forecast_date || day.date;
+          const condition = day.weather_condition || day.condition;
+          const tempHigh = day.predicted_temperature_high || day.temperature_high || 0;
+          const tempLow = day.predicted_temperature_low || day.temperature_low || 0;
+          
+          return (
+            <div key={index} className="forecast-day">
+              <div className="forecast-date">{formatDate(dateStr)}</div>
+              
+              <div className="forecast-icon">
+                {getWeatherIcon(condition)}
               </div>
-            )}
 
-            {day.confidence_score !== null && day.confidence_score !== undefined && (
-              <div className="forecast-confidence">
-                <div 
-                  className="confidence-bar"
-                  style={{ 
-                    width: `${day.confidence_score * 100}%`,
-                    backgroundColor: getConfidenceColor(day.confidence_score)
-                  }}
-                />
-                <div className="confidence-label">
-                  {getConfidenceLabel(day.confidence_score)} confidence
+              <div className="forecast-condition">{condition}</div>
+
+              <div className="forecast-temps">
+                <span className="temp-high">{Math.round(tempHigh)}°</span>
+                <span className="temp-separator">/</span>
+                <span className="temp-low">{Math.round(tempLow)}°</span>
+              </div>
+
+              {day.precipitation_probability !== null && day.precipitation_probability !== undefined && (
+                <div className="forecast-precipitation">
+                  <span className="precip-icon">💧</span>
+                  <span className="precip-value">{Math.round(day.precipitation_probability * 100)}%</span>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+
+              {day.confidence_score !== null && day.confidence_score !== undefined && (
+                <div className="forecast-confidence">
+                  <div 
+                    className="confidence-bar"
+                    style={{ 
+                      width: `${day.confidence_score * 100}%`,
+                      backgroundColor: getConfidenceColor(day.confidence_score)
+                    }}
+                  />
+                  <div className="confidence-label">
+                    {getConfidenceLabel(day.confidence_score)} confidence
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </WeatherCard>
   );

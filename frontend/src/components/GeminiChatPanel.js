@@ -52,7 +52,7 @@ const GeminiChatPanel = () => {
 
       const assistantMessage = {
         type: 'assistant',
-        content: response.response || response.explanation || 'I apologize, but I couldn\'t generate a response.',
+        content: response.answer || response.response || response.explanation || 'I apologize, but I couldn\'t generate a response.',
         timestamp: new Date(),
       };
 
