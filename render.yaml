@@ -32,6 +32,8 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: USE_MOCK_DB

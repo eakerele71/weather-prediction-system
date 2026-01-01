@@ -103,7 +103,7 @@ function validateLocationInput(input) {
   return { valid: true };
 }
 
-const LocationInput = ({ onLocationSelect }) => {
+const LocationInput = ({ onLocationSelect, initialValue }) => {
   const [input, setInput] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -154,6 +154,13 @@ const LocationInput = ({ onLocationSelect }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Sync input with initialValue (e.g., when detected by GPS)
+  useEffect(() => {
+    if (initialValue) {
+      setInput(initialValue);
+    }
+  }, [initialValue]);
+
   const handleInputChange = (e) => {
     setInput(e.target.value);
     setSelectedIndex(-1);
@@ -164,13 +171,8 @@ const LocationInput = ({ onLocationSelect }) => {
     setInput(location.city);
     setShowSuggestions(false);
 
-    try {
-      await fetchLocationData(location.city);
-      if (onLocationSelect) {
-        onLocationSelect(location);
-      }
-    } catch (error) {
-      console.error('Error fetching location data:', error);
+    if (onLocationSelect) {
+      onLocationSelect(location);
     }
   };
 
@@ -181,7 +183,7 @@ const LocationInput = ({ onLocationSelect }) => {
       // If a suggestion is selected, use it (skip validation - suggestions are pre-validated)
       if (selectedIndex >= 0 && suggestions[selectedIndex]) {
         setValidationError(null);
-        await handleLocationSelect(suggestions[selectedIndex]);
+        handleLocationSelect(suggestions[selectedIndex]);
       } else {
         // Validate input before making API call
         const validation = validateLocationInput(input);
@@ -194,15 +196,10 @@ const LocationInput = ({ onLocationSelect }) => {
         // Clear validation error and proceed
         setValidationError(null);
 
-        // Otherwise, try to fetch data for the entered city name
-        try {
-          await fetchLocationData(input.trim());
-          setShowSuggestions(false);
-          if (onLocationSelect) {
-            onLocationSelect({ city: input.trim() });
-          }
-        } catch (error) {
-          console.error('Error fetching location data:', error);
+        // Otherwise, trigger the select callback
+        setShowSuggestions(false);
+        if (onLocationSelect) {
+          onLocationSelect({ city: input.trim() });
         }
       }
     }

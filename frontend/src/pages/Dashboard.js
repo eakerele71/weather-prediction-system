@@ -20,8 +20,14 @@ import './Dashboard.css';
 const Dashboard = () => {
   const { currentLocation, loading, error, clearError, fetchLocationData } = useWeather();
 
-  const handleLocationSelect = (city) => {
-    fetchLocationData(city);
+  const handleLocationSelect = (cityOrLocation) => {
+    const cityName = typeof cityOrLocation === 'string'
+      ? cityOrLocation
+      : cityOrLocation?.city;
+
+    if (cityName) {
+      fetchLocationData(cityName);
+    }
   };
 
   return (
