@@ -29,6 +29,7 @@ const POPULAR_CITIES = [
 function validateLocationInput(input) {
   const trimmed = input.trim();
   const lowerCased = trimmed.toLowerCase();
+  const words = lowerCased.split(/\s+/);
 
   // Too short
   if (trimmed.length < 2) {
