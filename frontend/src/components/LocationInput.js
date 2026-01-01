@@ -55,6 +55,46 @@ function validateLocationInput(input) {
     };
   }
 
+  // Common human names (Global and Local Nigerian names) to block
+  const commonHumanNames = [
+    // Global Names
+    'james', 'john', 'robert', 'michael', 'william', 'david', 'richard', 'joseph', 'thomas', 'charles',
+    'mary', 'patricia', 'jennifer', 'linda', 'elizabeth', 'barbara', 'susan', 'jessica', 'sarah', 'karen',
+    'emma', 'olivia', 'ava', 'isabella', 'sophia', 'mia', 'charlotte', 'amelia', 'evelyn', 'abigail',
+    'liam', 'noah', 'oliver', 'elijah', 'james', 'william', 'benjamin', 'lucas', 'henry', 'alexander',
+
+    // Local Nigerian Names
+    'emeka', 'ngozi', 'chinelo', 'ifeanyi', 'chukwuma', 'nneka', 'obinna', 'chidi', 'ekene', 'chioma', // Igbo
+    'babajide', 'olumide', 'adesola', 'folasade', 'temitope', 'adenike', 'olamide', 'tunde', 'seun', 'yinka', // Yoruba
+    'musa', 'abubakar', 'fatima', 'aminu', 'zainab', 'umar', 'aisha', 'usman', 'hadiza', 'ibrahim', // Hausa/Fulani
+    'emmanuel', 'samuel', 'david', 'blessing', 'favour', 'joy', 'patience', 'gift', 'mercy', 'hope' // Common English names in Nigeria
+  ];
+
+  // Common phrases for introducing oneself
+  const namePhrases = [
+    'my name is', 'i am', 'call me', 'iam', 'name is', 'this is'
+  ];
+
+  // Check for introduction phrases
+  if (namePhrases.some(phrase => lowerCased.includes(phrase))) {
+    return {
+      valid: false,
+      error: 'Please enter a location, not an introduction.'
+    };
+  }
+
+  // Check if any word in the input is a common human name
+  // We only block if the input is short (1-2 words) to avoid blocking cities with names in them
+  if (words.length <= 2) {
+    const containsName = words.some(word => commonHumanNames.includes(word));
+    if (containsName) {
+      return {
+        valid: false,
+        error: 'Please enter a valid city, state, or country name, not a personal name.'
+      };
+    }
+  }
+
   // Common non-location words (food, objects, people, etc.)
   const nonLocationWords = [
     'rice', 'beans', 'food', 'pizza', 'burger', 'bread', 'meat', 'fish',
@@ -66,7 +106,6 @@ function validateLocationInput(input) {
   ];
 
   // Check if input contains multiple non-location words
-  const words = lowerCased.split(/\s+/);
   const nonLocationCount = words.filter(word => nonLocationWords.includes(word)).length;
 
   if (nonLocationCount >= 2) {
