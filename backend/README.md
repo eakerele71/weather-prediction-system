@@ -8,10 +8,23 @@
    cp .env.example .env
    ```
    
-   Edit `.env` and add your OpenWeather API key:
+   Edit `.env` and add your keys:
+   ```env
+   # Required for Weather Data
+   OPENWEATHER_API_KEY=your_openweather_key
+   
+   # Required for "Use My Location" (Reverse Geocoding)
+   GOOGLE_MAPS_API_KEY=your_google_maps_key
    ```
-   OPENWEATHER_API_KEY=your_actual_api_key_here
-   ```
+   
+   ### How to get Keys
+   - **OpenWeather**: [Get Free Key](https://openweathermap.org/api)
+   - **Google Maps**:
+     1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+     2. Create a new project
+     3. Enable **"Geocoding API"**
+     4. Create Credentials -> API Key
+     5. (Recommended) Restrict the key to use only Geocoding API
 
 2. **Run the Server**
    ```bash

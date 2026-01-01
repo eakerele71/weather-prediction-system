@@ -1,12 +1,9 @@
-"""
-Router for handling geolocation requests
-"""
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import httpx
 from typing import Optional
 import os
+from app.config import settings
 
 router = APIRouter(prefix="/api/v1/geolocation", tags=["geolocation"])
 
@@ -27,39 +24,52 @@ class LocationResponse(BaseModel):
 @router.post("/reverse-geocode", response_model=LocationResponse)
 async def reverse_geocode(coords: Coordinates):
     """
-    Convert coordinates to city name using OpenWeather Geocoding API
+    Convert coordinates to city name using Google Maps Geocoding API
     """
-    api_key = os.getenv("OPENWEATHER_API_KEY")
+    api_key = settings.google_maps_api_key
     if not api_key:
-        raise HTTPException(status_code=500, detail="OpenWeather API key not configured")
+        raise HTTPException(status_code=500, detail="Google Maps API key not configured")
     
     try:
         async with httpx.AsyncClient() as client:
-            # OpenWeather Reverse Geocoding API
+            # Google Maps Geocoding API
             response = await client.get(
-                "http://api.openweathermap.org/geo/1.0/reverse",
+                "https://maps.googleapis.com/maps/api/geocode/json",
                 params={
-                    "lat": coords.latitude,
-                    "lon": coords.longitude,
-                    "limit": 1,
-                    "appid": api_key
+                    "latlng": f"{coords.latitude},{coords.longitude}",
+                    "key": api_key,
+                    "result_type": "locality|political"
                 },
                 timeout=10.0
             )
             response.raise_for_status()
             data = response.json()
             
-            if not data:
+            if data.get("status") != "OK" or not data.get("results"):
                 raise HTTPException(
-                    status_code=404,
+                    status_code=404, 
                     detail="Could not determine location from coordinates"
                 )
             
-            location = data[0]
+            # Parse Google Maps response
+            result = data["results"][0]
+            city = "Unknown"
+            country = "Unknown"
+            state = None
+            
+            for component in result.get("address_components", []):
+                types = component.get("types", [])
+                if "locality" in types:
+                    city = component["long_name"]
+                elif "country" in types:
+                    country = component["long_name"]
+                elif "administrative_area_level_1" in types:
+                    state = component["long_name"]
+            
             return LocationResponse(
-                city=location.get("name", "Unknown"),
-                country=location.get("country", "Unknown"),
-                state=location.get("state"),
+                city=city,
+                country=country,
+                state=state,
                 latitude=coords.latitude,
                 longitude=coords.longitude
             )

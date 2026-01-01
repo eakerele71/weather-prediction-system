@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     
     # External API Keys
     openweather_api_key: Optional[str] = None
+    google_maps_api_key: Optional[str] = None
     gemini_api_key: Optional[str] = None
     
     # Application Configuration
