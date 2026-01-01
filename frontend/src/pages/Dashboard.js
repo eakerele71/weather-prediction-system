@@ -46,7 +46,7 @@ const Dashboard = () => {
             />
             <CurrentLocationButton
               onLocationDetected={(cityName, locationData) => {
-                handleLocationSelect(cityName);
+                handleLocationSelect(locationData?.country || cityName);
                 console.log('Detected location:', locationData);
               }}
             />

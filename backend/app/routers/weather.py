@@ -11,6 +11,7 @@ from app.services import (
 )
 from app.config import settings
 import logging
+import pycountry
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,34 @@ router = APIRouter(prefix="/api/v1", tags=["weather"])
 predictor = WeatherPredictor()
 data_collector = WeatherDataCollector()
 warning_generator = WarningGenerator()
+
+
+def normalize_country_name(value: str) -> Optional[str]:
+    if value is None:
+        return None
+
+    stripped = value.strip()
+    if not stripped:
+        return None
+
+    lowered = stripped.lower()
+    aliases = {
+        "uk": "united kingdom",
+        "u.k.": "united kingdom",
+        "usa": "united states",
+        "u.s.a.": "united states",
+        "us": "united states",
+        "u.s.": "united states",
+        "uae": "united arab emirates",
+    }
+
+    lookup_value = aliases.get(lowered, stripped)
+
+    try:
+        country = pycountry.countries.lookup(lookup_value)
+        return country.name
+    except LookupError:
+        return None
 
 
 async def geocode_city(city: str, country: Optional[str] = None) -> Optional[dict]:
@@ -243,13 +272,20 @@ async def get_forecast(
     Get weather forecast for a location
     """
     try:
+        normalized_country = normalize_country_name(city)
+        if not normalized_country:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Country not found: '{city}'. Please enter a valid country name."
+            )
+
         # Geocode the city
-        geo_data = await geocode_city(city, country)
+        geo_data = await geocode_city(normalized_country)
         
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Weather location not found for country: '{normalized_country}'. Please enter a valid country name."
             )
         
         location = Location(
@@ -291,13 +327,20 @@ async def get_current_weather(
     Get current weather conditions for a location
     """
     try:
-        # Geocode the city
-        geo_data = await geocode_city(city, country)
+        normalized_country = normalize_country_name(city)
+        if not normalized_country:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Country not found: '{city}'. Please enter a valid country name."
+            )
+
+        # Geocode the country
+        geo_data = await geocode_city(normalized_country)
         
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Weather location not found for country: '{normalized_country}'. Please enter a valid country name."
             )
         
         location = Location(
@@ -352,13 +395,20 @@ async def get_weather_warnings(
     Get active weather warnings for a location
     """
     try:
-        # Geocode the city
-        geo_data = await geocode_city(city, country)
+        normalized_country = normalize_country_name(city)
+        if not normalized_country:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Country not found: '{city}'. Please enter a valid country name."
+            )
+
+        # Geocode the country
+        geo_data = await geocode_city(normalized_country)
         
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Weather location not found for country: '{normalized_country}'. Please enter a valid country name."
             )
         
         location = Location(
@@ -444,13 +494,20 @@ async def get_hourly_forecast(
         List of hourly forecast data
     """
     try:
-        # Geocode the city
-        geo_data = await geocode_city(city, country)
+        normalized_country = normalize_country_name(city)
+        if not normalized_country:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Country not found: '{city}'. Please enter a valid country name."
+            )
+
+        # Geocode the country
+        geo_data = await geocode_city(normalized_country)
         
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Weather location not found for country: '{normalized_country}'. Please enter a valid country name."
             )
         
         location = Location(
