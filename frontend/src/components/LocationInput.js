@@ -243,9 +243,7 @@ const LocationInput = ({ onLocationSelect, initialValue }) => {
           <input
             ref={inputRef}
             type="text"
-            className="location-input"
-            placeholder="Enter country name (e.g., Nigeria, Canada, United States)"
-            value={input}
+            placeholder="Enter city, state, or country (e.g., New York, London, Nigeria)"
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => input.length > 0 && setShowSuggestions(true)}
