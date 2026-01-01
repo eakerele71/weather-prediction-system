@@ -25,7 +25,8 @@ const HourlyForecast = () => {
     setError(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/hourly/${currentLocation}?hours=48`);
+      const encodedCity = encodeURIComponent(currentLocation);
+      const response = await fetch(`${API_BASE_URL}/api/v1/hourly/${encodedCity}?hours=48`);
       
       if (response.ok) {
         const data = await response.json();

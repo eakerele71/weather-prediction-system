@@ -47,7 +47,8 @@ export const WeatherProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get(`/api/v1/current/${city}`);
+      const encodedCity = encodeURIComponent(city);
+      const response = await apiClient.get(`/api/v1/current/${encodedCity}`);
       setCurrentWeather(response.data);
       return response.data;
     } catch (err) {
@@ -71,7 +72,8 @@ export const WeatherProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get(`/api/v1/forecast/${city}`, {
+      const encodedCity = encodeURIComponent(city);
+      const response = await apiClient.get(`/api/v1/forecast/${encodedCity}`, {
         params: { days },
       });
       // Backend returns array directly, not wrapped in { forecasts: [...] }
@@ -97,7 +99,8 @@ export const WeatherProvider = ({ children }) => {
   // Fetch warnings
   const fetchWarnings = useCallback(async (city) => {
     try {
-      const response = await apiClient.get(`/api/v1/warnings/${city}`);
+      const encodedCity = encodeURIComponent(city);
+      const response = await apiClient.get(`/api/v1/warnings/${encodedCity}`);
       // Backend returns array directly, not wrapped in { warnings: [...] }
       const warningsData = Array.isArray(response.data) ? response.data : (response.data.warnings || []);
       setWarnings(warningsData);
@@ -111,7 +114,8 @@ export const WeatherProvider = ({ children }) => {
   // Fetch analytics
   const fetchAnalytics = useCallback(async (city, days = 30) => {
     try {
-      const response = await apiClient.get(`/api/v1/analytics/weather-analytics/${city}`, {
+      const encodedCity = encodeURIComponent(city);
+      const response = await apiClient.get(`/api/v1/analytics/weather-analytics/${encodedCity}`, {
         params: { days },
       });
       setAnalytics(response.data);

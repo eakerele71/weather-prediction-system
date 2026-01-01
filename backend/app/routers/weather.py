@@ -249,7 +249,7 @@ async def get_forecast(
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
             )
         
         location = Location(
@@ -297,7 +297,7 @@ async def get_current_weather(
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
             )
         
         location = Location(
@@ -358,7 +358,7 @@ async def get_weather_warnings(
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
             )
         
         location = Location(
@@ -450,7 +450,7 @@ async def get_hourly_forecast(
         if not geo_data:
             raise HTTPException(
                 status_code=404, 
-                detail=f"Location not found: '{city}'. Please enter a valid city, state, or country name."
+                detail=f"Location not found in the live API location database: '{city}'. Please enter a valid city, state, or country name."
             )
         
         location = Location(
