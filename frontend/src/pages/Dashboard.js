@@ -5,6 +5,8 @@ import Footer from '../components/Footer';
 import DashboardContainer from '../components/DashboardContainer';
 import WeatherCard from '../components/WeatherCard';
 import LocationInput from '../components/LocationInput';
+import CurrentLocationButton from '../components/CurrentLocationButton';
+
 import FavoriteLocations from '../components/FavoriteLocations';
 import CurrentWeatherCard from '../components/CurrentWeatherCard';
 import HourlyForecast from '../components/HourlyForecast';
@@ -16,7 +18,11 @@ import GeminiChatPanel from '../components/GeminiChatPanel';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { currentLocation, loading, error, clearError } = useWeather();
+  const { currentLocation, loading, error, clearError, fetchLocationData } = useWeather();
+
+  const handleLocationSelect = (city) => {
+    fetchLocationData(city);
+  };
 
   return (
     <div className="dashboard">
@@ -27,7 +33,18 @@ const Dashboard = () => {
 
       <main className="dashboard-main">
         <div className="container">
-          <LocationInput />
+          <div className="location-input-row">
+            <LocationInput
+              onLocationSelect={handleLocationSelect}
+              initialValue={currentLocation}
+            />
+            <CurrentLocationButton
+              onLocationDetected={(cityName, locationData) => {
+                handleLocationSelect(cityName);
+                console.log('Detected location:', locationData);
+              }}
+            />
+          </div>
           <FavoriteLocations />
 
           {error && (

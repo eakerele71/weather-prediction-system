@@ -14,6 +14,24 @@
   padding: 48px 0;
 }
 
+.location-input-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.location-input-row> :first-child {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .location-input-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
 .loading-container p {
   margin-top: 16px;
   color: var(--text-secondary);
@@ -88,6 +106,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

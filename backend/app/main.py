@@ -1,7 +1,7 @@
 """FastAPI application entry point"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import weather, analytics, gemini, auth
+from app.routers import weather, analytics, gemini, auth,geolocation
 from app.logging_config import setup_logging, log_startup_configuration
 from app.config import settings
 
@@ -47,6 +47,7 @@ app.include_router(auth.router)
 app.include_router(weather.router)
 app.include_router(analytics.router)
 app.include_router(gemini.router)
+app.include_router(geolocation.router)
 
 @app.get("/")
 async def root():
